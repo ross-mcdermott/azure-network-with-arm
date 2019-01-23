@@ -1,0 +1,111 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnet-name": {
+            "type": "string"
+        },
+        "vnet-prefix": {
+            "type": "string",
+            "metadata": {
+                "description": "IP prefix (first 2 octets)."
+            }
+        }
+    },
+    "variables": {
+        "nested-uri": "[concat(deployment().properties.templateLink.uri,'/nested/')]",
+        "vnet-address-space": "[concat(parameters('vnet-prefix'),'.0.0/16')]",
+        "subnets": [
+            {
+                "name": "mysubnet1",
+                "addressPrefix": "[concat(parameters('vnet-prefix'), '.1.0/24')]",
+                "additionalParameters": {}
+            },
+            {
+                "name": "mysubnet2",
+                "addressPrefix": "[concat(parameters('vnet-prefix'), '.2.0/24')]",
+                "additionalParameters": {}
+            },
+            {
+                "name": "mysubnet3",
+                "addressPrefix": "[concat(parameters('vnet-prefix'), '.3.0/24')]",
+                "additionalParameters": {}
+            },
+            {
+                "name": "GatewaySubnet",
+                "addressPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]",
+                "additionalParameters": {}
+            }
+        ]
+    },
+    "resources": [
+        {
+            "name": "[parameters('vnet-name')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "subnet-dependency-loop"
+            ],
+            "tags": {
+                "displayName": "Virtual Network"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnet-address-space')]"
+                    ]
+                },
+                "copy": [
+                    {
+                        "name": "vnet-subnets-loop",
+                        "count": "[length(variables('subnets')]",
+                        "input": {
+                            "name": "[variables('subnets')[copyIndex('vnet-subnets-loop')].name]",
+                            "properties": {
+                                "addressPrefix": "[variables('subnetAddressPrefix')[copyIndex('vnet-subnets-loop')]].addressPrefix",
+                                "networkSecurityGroup": {
+                                    "id": "[reference(concat(variables('subnets')[copyIndex('subnet-dependency-loop')].name,'-dependencies')).outputs.NsgResourceId.value]"
+                                },
+                                "routeTable": {
+                                    "id": "[reference(concat(variables('subnets')[copyIndex('subnet-dependency-loop')].name,'-dependencies')).outputs.UdrResourceId.value]"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(variables('subnets')[copyIndex('subnet-dependency-loop')].name,'-dependencies')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2016-09-01",
+            "dependsOn": [],
+            "copy": {
+                "name": "subnet-dependency-loop",
+                "count": "[length(variables('subnets')]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(variables('nested-uri'), toLower(concat(variables('subnets')[copyIndex('subnet-dependency-loop')].name),'.json'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "subnet-name": {
+                        "value": "[variables('subnets')[copyIndex('subnet-dependency-loop')].name)]"
+                    },
+                    "vnet-address-space": {
+                        "value": "[variables('vnet-address-space')]"
+                    },
+                    "subnet-address-space": {
+                        "value": "[variables('subnets')[copyIndex('subnet-dependency-loop')].addressPrefix)]"
+                    },
+                    "additional-parameters": {
+                        "value": "[variables('subnets')[copyIndex('subnet-dependency-loop')].additionalParameters)]"
+                    }
+                }
+            }
+        }
+    ]
+}
