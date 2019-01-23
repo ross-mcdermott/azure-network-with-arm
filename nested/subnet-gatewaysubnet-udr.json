@@ -1,0 +1,62 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnet-address-space": {
+            "type": "string",
+            "metadata": {
+                "description": "Address space of the VNET the subnet is within"
+            }
+        },
+        "subnet-address-space": {
+            "type": "string",
+            "metadata": {
+                "description": "Address space the subnet has been allocated"
+            }
+        },
+        "subnet-name": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the subnet this applies to"
+            }
+        },
+        "additional-parameters": {
+            "type": "object",
+            "metadata": {
+                "description": "Additional parameters as passed through"
+            }
+        }
+    },
+    "variables": {
+        "udr-name": "[concat(parameters('subnet-name'),'-udr')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/routeTables",
+            "name": "[variables('udr-name')]",
+            "location": "[resourceGroup().location]",
+            "comments": "Create the UDRs required for the gateway subnet.",
+            "properties": {
+                "routes": [
+                    {
+                        "name": "RouteToDc",
+                        "properties": {
+                            "addressPrefix": "[parameters('additional-parameters').localAddressSpace]",
+                            "nextHopType": "VirtualNetworkGateway"
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "displayName": "UDR - GatewaySubnet"
+            }
+        }
+    ],
+    "outputs": {
+        "UdrResourceId": {
+            "value": "[resourceId('Microsoft.Network/routeTables',variables('udr-name'))]",
+            "type": "string"
+        }
+    }
+}

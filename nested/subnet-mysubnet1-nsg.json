@@ -28,8 +28,7 @@
         }
     },
     "variables": {
-        "nsg-name": "[concat(parameters('subnet-name'),'-nsg')]",
-        "udr-name": "[concat(parameters('subnet-name'),'-udr')]"
+        "nsg-name": "[concat(parameters('subnet-name'),'-nsg')]"
     },
     "resources": [
         {
@@ -41,23 +40,9 @@
                 "securityRules": []
             },
             "tags": {}
-        },
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/routeTables",
-            "name": "[variables('udr-name')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "routes": []
-            },
-            "tags": {}
         }
     ],
     "outputs": {
-        "UdrResourceId": {
-            "value": "[resourceId('Microsoft.Network/routeTables',variables('udr-name'))]",
-            "type": "string"
-        },
         "NsgResourceId": {
             "value": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsg-name'))]",
             "type": "string"
