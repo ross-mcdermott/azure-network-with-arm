@@ -17,13 +17,15 @@
             "defaultValue": ""
         },
         "vnet-name": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "sample-vnet"
         },
         "vnet-prefix": {
             "type": "string",
             "metadata": {
                 "description": "IP prefix (first 2 octets for this sample)."
-            }
+            },
+            "defaultValue": "10.1"
         }
     },
     "variables": {
