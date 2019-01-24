@@ -17,6 +17,16 @@ az group deployment create -g MyResourceGroup --template-file azuredeploy.json \
 ```
 
 
+```
+az group deployment create -g SampleAzureNetwork --template-uri https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/working/azuredeploy.json --parameters vnet-name=sample-vnet vnet-prefix=10.1
+
+```
+
+
+https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/working/azuredeploy.json
+
+
+
 {
             "condition": "[equals(parameters('enable-hybrid'),'true')]",
             "apiVersion": "2016-03-30",
@@ -143,3 +153,11 @@ az group deployment create -g MyResourceGroup --template-file azuredeploy.json \
             },
             "defaultValue": "NA"
         }
+
+         {
+                        "name": "RouteToDc",
+                        "properties": {
+                            "addressPrefix": "[parameters('additional-parameters').localAddressSpace]",
+                            "nextHopType": "VirtualNetworkGateway"
+                        }
+                    }

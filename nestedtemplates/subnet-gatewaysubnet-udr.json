@@ -26,15 +26,7 @@
             "location": "[resourceGroup().location]",
             "comments": "Create the UDRs required for the gateway subnet.",
             "properties": {
-                "routes": [
-                    {
-                        "name": "RouteToDc",
-                        "properties": {
-                            "addressPrefix": "[parameters('additional-parameters').localAddressSpace]",
-                            "nextHopType": "VirtualNetworkGateway"
-                        }
-                    }
-                ]
+                "routes": []
             },
             "tags": {
                 "displayName": "UDR - GatewaySubnet"

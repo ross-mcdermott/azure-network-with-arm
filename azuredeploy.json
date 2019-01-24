@@ -23,9 +23,8 @@
         "vnet-prefix": {
             "type": "string",
             "metadata": {
-                "description": "IP prefix (first 2 octets for this sample)."
-            },
-            "defaultValue": "10.1"
+                "description": "IP prefix (first 2 octets for this sample, e.g. 10.1)."
+            }
         }
     },
     "variables": {
@@ -50,9 +49,7 @@
                 "name": "GatewaySubnet",
                 "addressPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]",
                 "comments": "Additional parameters will be passed through to the UDR and NSG templates",
-                "additionalParameters": {
-                    "localAddressSpace": "[parameters('local-dc-address-prefix')]"
-                }
+                "additionalParameters": {}
             }
         ],
         "vnet-gateway-name": "[concat(parameters('vnet-name'),'-vng')]",
