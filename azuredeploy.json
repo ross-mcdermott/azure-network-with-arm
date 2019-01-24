@@ -81,7 +81,7 @@
                                     "id": "[reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-dependencies')).outputs.NsgResourceId.value]"
                                 },
                                 "routeTable": {
-                                    "id": "[if(equals(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'GatewaySubnet'),json('null'),reference(concat(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name,'-dependencies')).outputs.UdrResourceId.value)]"
+                                    "id": "[if(equals(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'GatewaySubnet'),json('null'),reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-dependencies')).outputs.UdrResourceId.value)]"
                                 }
                             }
                         }
