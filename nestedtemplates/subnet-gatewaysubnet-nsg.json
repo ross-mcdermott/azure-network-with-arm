@@ -21,7 +21,7 @@
     "resources": [],
     "outputs": {
         "UdrResourceId": {
-            "value": "[json('null')]",
+            "value": "",
             "type": "string"
         }
     }
