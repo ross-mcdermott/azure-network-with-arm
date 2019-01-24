@@ -18,7 +18,7 @@ az group deployment create -g sample-vnet-rg \
         --parameters vnet-name=sample-vnet vnet-prefix=10.1
 ```
 
-
+az group deployment create -g sample-vnet-rg --template-uri https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/working/azuredeploy.json --parameters vnet-name=sample-vnet vnet-prefix=10.1
 
 https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/working/azuredeploy.json
 

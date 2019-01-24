@@ -46,11 +46,6 @@
                 "additionalParameters": {}
             },
             {
-                "name": "mysubnet4",
-                "addressPrefix": "[concat(parameters('vnet-prefix'), '.4.0/24')]",
-                "additionalParameters": {}
-            },
-            {
                 "name": "[variables('const_GatewaySubnetName')]",
                 "addressPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]",
                 "additionalParameters": {}
