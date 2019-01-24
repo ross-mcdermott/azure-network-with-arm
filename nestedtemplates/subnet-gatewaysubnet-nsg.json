@@ -20,7 +20,7 @@
     },
     "resources": [],
     "outputs": {
-        "UdrResourceId": {
+        "NsgResourceId": {
             "value": "",
             "type": "string"
         }
