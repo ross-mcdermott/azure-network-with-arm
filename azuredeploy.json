@@ -2,41 +2,28 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+            },
+            "defaultValue": "[deployment().properties.templateLink.uri]"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation. Use the defaultValue if the staging location is not secured."
+            },
+            "defaultValue": ""
+        },
         "vnet-name": {
             "type": "string"
         },
         "vnet-prefix": {
             "type": "string",
             "metadata": {
-                "description": "IP prefix (first 2 octets)."
+                "description": "IP prefix (first 2 octets for this sample)."
             }
-        },
-        "local-dc-address-prefix": {
-            "type": "string",
-            "metadata": {
-                "description": "Internal address prefix of the DC for routing purposes"
-            }
-        },
-        "enable-hybrid": {
-            "type": "boolean",
-            "metadata": {
-                "description": "True to include the VPN connectivity"
-            },
-            "defaultValue": "false"
-        },
-        "vpn-sku": {
-            "type": "string",
-            "metadata": {
-                "description": "VPN SKU to use"
-            },
-            "defaultValue": "Standard"
-        },
-        "vpn-shared-key": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Shared key to initiate the connection to the local site (DC). Use KeyVault in production scenarios."
-            },
-            "defaultValue": "NA"
         }
     },
     "variables": {
@@ -60,12 +47,12 @@
             {
                 "name": "GatewaySubnet",
                 "addressPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]",
+                "comments": "Additional parameters will be passed through to the UDR and NSG templates",
                 "additionalParameters": {
                     "localAddressSpace": "[parameters('local-dc-address-prefix')]"
                 }
             }
         ],
-        "nested-uri": "[concat(deployment().properties.templateLink.uri,'/nested/')]",
         "vnet-gateway-name": "[concat(parameters('vnet-name'),'-vng')]",
         "vnet-gateway-ip-name": "[concat(variables('vnet-gateway-name'),'-pip')]",
         "vnet-local-gateway-name": "[concat(parameters('vnet-name'),'-dc-lng')]",
@@ -81,9 +68,6 @@
                 "subnet-udr-dependency-loop",
                 "subnet-nsg-dependency-loop"
             ],
-            "tags": {
-                "displayName": "Virtual Network"
-            },
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -119,21 +103,16 @@
                 "name": "subnet-nsg-dependency-loop",
                 "count": "[length(variables('subnets')-1]"
             },
+            "comments": "Generate the NSG resource for each of the subnets.",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(variables('nested-uri'), toLower(concat('subnet-',variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name),'-nsg.json'))]",
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/subnet-',variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name),'-nsg.json',parameters('_artifactsLocationSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
                     "subnet-name": {
                         "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name)]"
-                    },
-                    "vnet-address-space": {
-                        "value": "[variables('vnet-address-space')]"
-                    },
-                    "subnet-address-space": {
-                        "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].addressPrefix)]"
                     },
                     "additional-parameters": {
                         "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].additionalParameters)]"
@@ -150,124 +129,21 @@
                 "name": "subnet-udr-dependency-loop",
                 "count": "[length(variables('subnets')]"
             },
+            "comments": "Generate the UDR resource for each of the subnets.",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(variables('nested-uri'), toLower('subnet-',concat(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name),'-udr.json'))]",
+                    "uri": "[uri(variables('nested-uri'), concat('nestedtemplates/subnet-',variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name),'-udr.json',parameters('_artifactsLocationSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
                     "subnet-name": {
                         "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name)]"
                     },
-                    "vnet-address-space": {
-                        "value": "[variables('vnet-address-space')]"
-                    },
-                    "subnet-address-space": {
-                        "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].addressPrefix)]"
-                    },
                     "additional-parameters": {
                         "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].additionalParameters)]"
                     }
                 }
-            }
-        },
-        {
-            "condition": "[equals(parameters('enable-hybrid'),'true')]",
-            "apiVersion": "2016-03-30",
-            "type": "Microsoft.Network/localNetworkGateways",
-            "name": "[variables('vnet-local-gateway-name')]",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "displayName": "Local Network Gateway (to Office)"
-            },
-            "dependsOn": [
-                "[parameters('vnet-name')]"
-            ],
-            "properties": {
-                "localNetworkAddressSpace": {
-                    "addressPrefixes": "[parameters('vpn-local-address-prefixes')]"
-                },
-                "gatewayIpAddress": "[parameters('vpn-local-gateway-ip-address')]"
-            }
-        },
-        {
-            "condition": "[equals(parameters('enable-hybrid'),'true')]",
-            "apiVersion": "2016-03-30",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('vnet-gateway-ip-name')]",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "displayName": "Virtual Network Gateway Public IP Address"
-            },
-            "dependsOn": [
-                "[parameters('vnet-name')]"
-            ],
-            "properties": {
-                "publicIPAllocationMethod": "Dynamic"
-            }
-        },
-        {
-            "condition": "[equals(parameters('enable-hybrid'),'true')]",
-            "apiVersion": "2017-06-01",
-            "name": "[variables('vnet-gateway-name')]",
-            "type": "Microsoft.Network/virtualNetworkGateways",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "displayName": "Virtual Network Gateway"
-            },
-            "dependsOn": [
-                "[variables('vnet-gateway-ip-name')]",
-                "[parameters('vnet-name')]"
-            ],
-            "properties": {
-                "gatewayType": "Vpn",
-                "ipConfigurations": [
-                    {
-                        "name": "default",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('vnet-name')),'/subnets/GatewaySubnet')]"
-                            },
-                            "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('vnet-gateway-ip-name'))]"
-                            }
-                        }
-                    }
-                ],
-                "enableBgp": false,
-                "vpnType": "RouteBased",
-                "sku": {
-                    "name": "[parameters('vpn-sku')]",
-                    "tier": "[parameters('vpn-sku')]"
-                }
-            }
-        },
-        {
-            "condition": "[equals(parameters('enable-hybrid'),'true')]",
-            "apiVersion": "2015-06-15",
-            "name": "[variables('vnet-to-dc-connection-name')]",
-            "type": "Microsoft.Network/connections",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "displayName": "VNG to LNG Connection"
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('vnet-name'))]",
-                "[concat('Microsoft.Network/virtualNetworkGateways/', variables('vnet-gateway-name'))]",
-                "[concat('Microsoft.Network/localNetworkGateways/', variables('vnet-local-gateway-name'))]"
-            ],
-            "properties": {
-                "virtualNetworkGateway1": {
-                    "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('vnet-gateway-name'))]"
-                },
-                "localNetworkGateway2": {
-                    "id": "[resourceId('Microsoft.Network/localNetworkGateways', variables('vnet-local-gateway-name'))]"
-                },
-                "connectionType": "IPsec",
-                "routingWeight": 10,
-                "sharedKey": "[parameters('vpn-shared-key')]"
             }
         }
     ]

@@ -2,18 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "vnet-address-space": {
-            "type": "string",
-            "metadata": {
-                "description": "Address space of the VNET the subnet is within"
-            }
-        },
-        "subnet-address-space": {
-            "type": "string",
-            "metadata": {
-                "description": "Address space the subnet has been allocated"
-            }
-        },
         "subnet-name": {
             "type": "string",
             "metadata": {
