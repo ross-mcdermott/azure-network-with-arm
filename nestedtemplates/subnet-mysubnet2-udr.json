@@ -2,10 +2,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "subnet-name": {
+        "resource-name": {
             "type": "string",
             "metadata": {
-                "description": "Name of the subnet this applies to"
+                "description": "Name to apply to this resource"
             }
         },
         "additional-parameters": {
@@ -15,25 +15,18 @@
             }
         }
     },
-    "variables": {
-        "udr-name": "[concat(parameters('subnet-name'),'-udr')]"
-    },
+    "variables": {},
     "resources": [
         {
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/routeTables",
-            "name": "[variables('udr-name')]",
+            "name": "[parameters('resource-name')]",
             "location": "[resourceGroup().location]",
+            "comments": "Create the UDRs required for the subnet.",
             "properties": {
                 "routes": []
-            },
-            "tags": {}
+            }
         }
     ],
-    "outputs": {
-        "UdrResourceId": {
-            "value": "[resourceId('Microsoft.Network/routeTables',variables('udr-name'))]",
-            "type": "string"
-        }
-    }
+    "outputs": {}
 }
