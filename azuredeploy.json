@@ -126,7 +126,7 @@
             "dependsOn": [],
             "copy": {
                 "name": "subnet-udr-dependency-loop",
-                "count": "[length(variables('subnets')]"
+                "count": "[length(variables('subnets'))]"
             },
             "comments": "Generate the UDR resource for each of the subnets.",
             "properties": {
