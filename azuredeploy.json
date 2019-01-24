@@ -75,17 +75,17 @@
                 },
                 "copy": [
                     {
-                        "name": "vnet-subnets-loop",
+                        "name": "subnets",
                         "count": "[length(variables('subnets'))]",
                         "input": {
-                            "name": "[variables('subnets')[copyIndex('vnet-subnets-loop')].name]",
+                            "name": "[variables('subnets')[copyIndex('subnets')].name]",
                             "properties": {
-                                "addressPrefix": "[variables('subnets')[copyIndex('vnet-subnets-loop')].addressPrefix]",
+                                "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
                                 "networkSecurityGroup": {
-                                    "id": "[reference(concat(toLower(variables('subnets')[copyIndex('vnet-subnets-loop')].name),'-nsg-dependencies')).outputs.NsgResourceId.value]"
+                                    "id": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-nsg-dependencies')).outputs.NsgResourceId.value]"
                                 },
                                 "routeTable": {
-                                    "id": "[reference(concat(toLower(variables('subnets')[copyIndex('vnet-subnets-loop')].name),'-udr-dependencies')).outputs.UdrResourceId.value]"
+                                    "id": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-udr-dependencies')).outputs.UdrResourceId.value]"
                                 }
                             }
                         }
