@@ -11,16 +11,13 @@
 
 override some parameters.
 ```
-az group deployment create -g MyResourceGroup --template-file azuredeploy.json \
-                            --parameters @azuredeploy.parameters.json 
-                            --parameters MyValue=This MyArray=@array.json
+az group create --name "sample-vnet-rg" --location "Australia East"
+
+az group deployment create -g sample-vnet-rg \
+        --template-uri https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/working/azuredeploy.json \
+        --parameters vnet-name=sample-vnet vnet-prefix=10.1
 ```
 
-
-```
-az group deployment create -g SampleAzureNetwork --template-uri https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/working/azuredeploy.json --parameters vnet-name=sample-vnet vnet-prefix=10.1
-
-```
 
 
 https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/working/azuredeploy.json

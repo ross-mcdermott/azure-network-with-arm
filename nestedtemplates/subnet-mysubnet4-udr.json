@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resource-name": {
+            "type": "string",
+            "metadata": {
+                "description": "Name to apply to this resource"
+            }
+        },
+        "additional-parameters": {
+            "type": "object",
+            "metadata": {
+                "description": "Additional parameters as passed through"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/routeTables",
+            "name": "[parameters('resource-name')]",
+            "location": "[resourceGroup().location]",
+            "comments": "Create the UDRs required for the subnet.",
+            "properties": {
+                "routes": []
+            }
+        }
+    ],
+    "outputs": {}
+}
