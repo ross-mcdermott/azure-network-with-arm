@@ -55,7 +55,11 @@
                 "additionalParameters": {},
                 "linkNsg": false
             }
-        ]
+        ],
+        "null": null,
+        "nsgVar": {
+            "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg'))]"
+        }
     },
     "resources": [
         {
@@ -81,9 +85,7 @@
                             "name": "[variables('subnets')[copyIndex('subnets')].name]",
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
-                                "networkSecurityGroup": {
-                                    "id": null
-                                },
+                                "networkSecurityGroup": "[if(equals(add(copyIndex('subnets'),1),length(variables('subnets'))),variables('null'),variables('nsgVar'))]",
                                 "routeTable": {
                                     "id": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-udr-dependencies')).outputs.UdrResourceId.value]"
                                 }
