@@ -100,7 +100,7 @@
             "dependsOn": [],
             "copy": {
                 "name": "subnet-nsg-dependency-loop",
-                "count": "[length(variables('subnets')-1]"
+                "count": "[sub(length(variables('subnets')),1)]"
             },
             "comments": "Generate the NSG resource for each of the subnets.",
             "properties": {
