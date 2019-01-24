@@ -76,9 +76,9 @@
                         "input": {
                             "name": "[variables('subnets')[copyIndex('vnet-subnets-loop')].name]",
                             "properties": {
-                                "addressPrefix": "[variables('subnetAddressPrefix')[copyIndex('vnet-subnets-loop')].addressPrefix]",
+                                "addressPrefix": "[variables('subnets')[copyIndex('vnet-subnets-loop')].addressPrefix]",
                                 "networkSecurityGroup": {
-                                    "id": "[reference(concat(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,'-dependencies')).outputs.NsgResourceId.value]"
+                                    "id": "[reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-dependencies')).outputs.NsgResourceId.value]"
                                 },
                                 "routeTable": {
                                     "id": "[if(equals(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'GatewaySubnet'),json('null'),reference(concat(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name,'-dependencies')).outputs.UdrResourceId.value)]"
