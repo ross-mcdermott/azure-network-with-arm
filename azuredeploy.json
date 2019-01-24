@@ -72,7 +72,7 @@
                 "copy": [
                     {
                         "name": "vnet-subnets-loop",
-                        "count": "[length(variables('subnets')]",
+                        "count": "[length(variables('subnets'))]",
                         "input": {
                             "name": "[variables('subnets')[copyIndex('vnet-subnets-loop')].name]",
                             "properties": {
