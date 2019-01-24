@@ -33,23 +33,27 @@
             {
                 "name": "mysubnet1",
                 "addressPrefix": "[concat(parameters('vnet-prefix'), '.1.0/24')]",
-                "additionalParameters": {}
+                "additionalParameters": {},
+                "linkNsg": true
             },
             {
                 "name": "mysubnet2",
                 "addressPrefix": "[concat(parameters('vnet-prefix'), '.2.0/24')]",
-                "additionalParameters": {}
+                "additionalParameters": {},
+                "linkNsg": true
             },
             {
                 "name": "mysubnet3",
                 "addressPrefix": "[concat(parameters('vnet-prefix'), '.3.0/24')]",
-                "additionalParameters": {}
+                "additionalParameters": {},
+                "linkNsg": true
             },
             {
                 "name": "GatewaySubnet",
                 "addressPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]",
                 "comments": "Additional parameters will be passed through to the UDR and NSG templates",
-                "additionalParameters": {}
+                "additionalParameters": {},
+                "linkNsg": false
             }
         ]
     },
@@ -78,7 +82,7 @@
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('vnet-subnets-loop')].addressPrefix]",
                                 "networkSecurityGroup": {
-                                    "id": "[if(bool(equals(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'GatewaySubnet')),json('null'),reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-nsg-dependencies')).outputs.NsgResourceId.value)]"
+                                    "id": "[reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-nsg-dependencies')).outputs.NsgResourceId.value]"
                                 },
                                 "routeTable": {
                                     "id": "[reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-udr-dependencies')).outputs.UdrResourceId.value]"
