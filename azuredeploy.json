@@ -51,11 +51,7 @@
                 "comments": "Additional parameters will be passed through to the UDR and NSG templates",
                 "additionalParameters": {}
             }
-        ],
-        "vnet-gateway-name": "[concat(parameters('vnet-name'),'-vng')]",
-        "vnet-gateway-ip-name": "[concat(variables('vnet-gateway-name'),'-pip')]",
-        "vnet-local-gateway-name": "[concat(parameters('vnet-name'),'-dc-lng')]",
-        "vnet-to-dc-connection-name": "[concat(parameters('vnet-name'),'-to-dc-connection')]"
+        ]
     },
     "resources": [
         {
@@ -80,7 +76,7 @@
                         "input": {
                             "name": "[variables('subnets')[copyIndex('vnet-subnets-loop')].name]",
                             "properties": {
-                                "addressPrefix": "[variables('subnetAddressPrefix')[copyIndex('vnet-subnets-loop')]].addressPrefix",
+                                "addressPrefix": "[variables('subnetAddressPrefix')[copyIndex('vnet-subnets-loop')].addressPrefix]",
                                 "networkSecurityGroup": {
                                     "id": "[reference(concat(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,'-dependencies')).outputs.NsgResourceId.value]"
                                 },
@@ -106,15 +102,15 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/subnet-',variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name),'-nsg.json',parameters('_artifactsLocationSasToken'))]",
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/subnet-',variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,'-nsg.json',parameters('_artifactsLocationSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
                     "subnet-name": {
-                        "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name)]"
+                        "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name]"
                     },
                     "additional-parameters": {
-                        "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].additionalParameters)]"
+                        "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].additionalParameters]"
                     }
                 }
             }
@@ -132,15 +128,15 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(variables('nested-uri'), concat('nestedtemplates/subnet-',variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name),'-udr.json',parameters('_artifactsLocationSasToken'))]",
+                    "uri": "[uri(variables('nested-uri'), concat('nestedtemplates/subnet-',variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name,'-udr.json',parameters('_artifactsLocationSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
                     "subnet-name": {
-                        "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name)]"
+                        "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name]"
                     },
                     "additional-parameters": {
-                        "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].additionalParameters)]"
+                        "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].additionalParameters]"
                     }
                 }
             }

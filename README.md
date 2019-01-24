@@ -161,3 +161,9 @@ https://raw.githubusercontent.com/ross-mcdermott/hybrid-azure-network-with-arm/w
                             "nextHopType": "VirtualNetworkGateway"
                         }
                     }
+
+
+                            "vnet-gateway-name": "[concat(parameters('vnet-name'),'-vng')]",
+        "vnet-gateway-ip-name": "[concat(variables('vnet-gateway-name'),'-pip')]",
+        "vnet-local-gateway-name": "[concat(parameters('vnet-name'),'-dc-lng')]",
+        "vnet-to-dc-connection-name": "[concat(parameters('vnet-name'),'-to-dc-connection')]"
