@@ -82,7 +82,7 @@
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
                                 "networkSecurityGroup": {
-                                    "id": "[if(equals(add(copyIndex('subnets'),1),length(variables('subnets'))),'',resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg')))]"
+                                    "id": "[if(equals(add(copyIndex('subnets'),1),length(variables('subnets'))),json('null'),resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg')))]"
                                 },
                                 "routeTable": {
                                     "id": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-udr-dependencies')).outputs.UdrResourceId.value]"
