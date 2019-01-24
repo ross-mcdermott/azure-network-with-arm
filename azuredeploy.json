@@ -56,7 +56,7 @@
                 "linkNsg": false
             }
         ],
-        "null": null,
+        "null": {},
         "nsgVar": {
             "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg'))]"
         }
