@@ -82,10 +82,10 @@
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('vnet-subnets-loop')].addressPrefix]",
                                 "networkSecurityGroup": {
-                                    "id": "[reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-nsg-dependencies')).outputs.NsgResourceId.value]"
+                                    "id": "[reference(concat(toLower(variables('subnets')[copyIndex('vnet-subnets-loop')].name),'-nsg-dependencies')).outputs.NsgResourceId.value]"
                                 },
                                 "routeTable": {
-                                    "id": "[reference(concat(variables('subnets')[copyIndex('vnet-subnets-loop')].name,'-udr-dependencies')).outputs.UdrResourceId.value]"
+                                    "id": "[reference(concat(toLower(variables('subnets')[copyIndex('vnet-subnets-loop')].name),'-udr-dependencies')).outputs.UdrResourceId.value]"
                                 }
                             }
                         }
@@ -94,7 +94,7 @@
             }
         },
         {
-            "name": "[concat(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,'-nsg-dependencies')]",
+            "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name),'-nsg-dependencies')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2016-09-01",
             "dependsOn": [],
@@ -120,7 +120,7 @@
             }
         },
         {
-            "name": "[concat(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name,'-udr-dependencies')]",
+            "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name),'-udr-dependencies')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2016-09-01",
             "dependsOn": [],
