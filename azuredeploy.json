@@ -43,20 +43,32 @@
             {
                 "name": "mysubnet1",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet1Prefix]",
-                "additionalNsgParameters": {},
-                "additionalUdrParameters": {}
+                "additionalNsgParameters": {
+                    "suppress": true
+                },
+                "additionalUdrParameters": {
+                    "suppress": false
+                }
             },
             {
                 "name": "mysubnet2",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet2Prefix]",
-                "additionalNsgParameters": {},
-                "additionalUdrParameters": {}
+                "additionalNsgParameters": {
+                    "suppress": true
+                },
+                "additionalUdrParameters": {
+                    "suppress": false
+                }
             },
             {
                 "name": "mysubnet3",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet3Prefix]",
-                "additionalNsgParameters": {},
-                "additionalUdrParameters": {}
+                "additionalNsgParameters": {
+                    "suppress": true
+                },
+                "additionalUdrParameters": {
+                    "suppress": false
+                }
             },
             {
                 "name": "GatewaySubnet",
@@ -95,7 +107,7 @@
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
                                 "networkSecurityGroup": "[if(not(coalesce(variables('subnets')[copyIndex('subnets')].additionalNsgParameters.suppress, bool('False'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
-                                "routeTable": "[if(not(coalesce(variables('subnets')[copyIndex('subnets')].additionalUdrParameters.suppress, bool('False'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', concat(variables('subnets')[copyIndex('subnets')].name,'-udr')), '\"}')),json('null'))]"
+                                "routeTable": "[if(not(coalesce(variables('subnets')[copyIndex('subnets')].additionalUdrParameters.suppress, bool('False'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/',           concat(variables('subnets')[copyIndex('subnets')].name,'-udr')), '\"}')),json('null'))]"
                             }
                         }
                     }
