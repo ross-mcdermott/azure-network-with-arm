@@ -92,7 +92,9 @@
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
                                 "networkSecurityGroup": "[if(not(equals(variables('subnets')[copyIndex('subnets')].name,variables('const_GatewaySubnet'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
-                                "routeTable": "[if(variables('subnets')[copyIndex('subnets')].additionalUdrParameters.create, json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/',           concat(variables('subnets')[copyIndex('subnets')].name,'-udr')), '\"}')),json('null'))]"
+                                "routeTable": {
+                                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', concat(variables('subnets')[copyIndex('subnets')].name,'-udr'))]"
+                                }
                             }
                         }
                     }
