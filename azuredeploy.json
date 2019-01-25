@@ -43,44 +43,29 @@
             {
                 "name": "mysubnet1",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet1Prefix]",
-                "additionalNsgParameters": {
-                    "suppress": true
-                },
-                "additionalUdrParameters": {
-                    "suppress": false
-                }
+                "additionalNsgParameters": {},
+                "additionalUdrParameters": {}
             },
             {
                 "name": "mysubnet2",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet2Prefix]",
-                "additionalNsgParameters": {
-                    "suppress": true
-                },
-                "additionalUdrParameters": {
-                    "suppress": false
-                }
+                "additionalNsgParameters": {},
+                "additionalUdrParameters": {}
             },
             {
                 "name": "mysubnet3",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet3Prefix]",
-                "additionalNsgParameters": {
-                    "suppress": true
-                },
-                "additionalUdrParameters": {
-                    "suppress": false
-                }
+                "additionalNsgParameters": {},
+                "additionalUdrParameters": {}
             },
             {
-                "name": "GatewaySubnet",
+                "name": "[variables('const_GatewaySubnet')]",
                 "addressPrefix": "[variables('subnet-address-prefixes').GatewaySubnetPrefix]",
-                "additionalNsgParameters": {
-                    "suppress": true
-                },
-                "additionalUdrParameters": {
-                    "suppress": false
-                }
+                "additionalNsgParameters": {},
+                "additionalUdrParameters": {}
             }
-        ]
+        ],
+        "const_GatewaySubnet": "GatewaySubnet"
     },
     "resources": [
         {
@@ -106,8 +91,8 @@
                             "name": "[variables('subnets')[copyIndex('subnets')].name]",
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
-                                "networkSecurityGroup": "[if(not(coalesce(variables('subnets')[copyIndex('subnets')].additionalNsgParameters.suppress, bool('False'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
-                                "routeTable": "[if(not(coalesce(variables('subnets')[copyIndex('subnets')].additionalUdrParameters.suppress, bool('False'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/',           concat(variables('subnets')[copyIndex('subnets')].name,'-udr')), '\"}')),json('null'))]"
+                                "networkSecurityGroup": "[if(not(equals(variables('subnets')[copyIndex('subnets')].name,variables('const_GatewaySubnet'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
+                                "routeTable": "[if(variables('subnets')[copyIndex('subnets')].additionalUdrParameters.create, json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/',           concat(variables('subnets')[copyIndex('subnets')].name,'-udr')), '\"}')),json('null'))]"
                             }
                         }
                     }
@@ -115,7 +100,7 @@
             }
         },
         {
-            "condition": "[not(coalesce(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].additionalNsgParameters.suppress, bool('False')))]",
+            "condition": "[not(equals(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,variables('const_GatewaySubnet')))]",
             "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name),'-nsg-dependencies')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2016-09-01",
@@ -124,7 +109,7 @@
                 "name": "subnet-nsg-dependency-loop",
                 "count": "[length(variables('subnets'))]"
             },
-            "comments": "Generate the NSG resource for each of the subnets configured to do so. To suppress creation, set subnet.additionalNsgParameters.suppress=true",
+            "comments": "Generate the UDR resource for each of the subnets (Except GatewaySubnet where it is not supported).",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -142,7 +127,6 @@
             }
         },
         {
-            "condition": "[not(coalesce(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].additionalUdrParameters.suppress, bool('False')))]",
             "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name),'-udr-dependencies')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2016-09-01",
@@ -151,7 +135,7 @@
                 "name": "subnet-udr-dependency-loop",
                 "count": "[length(variables('subnets'))]"
             },
-            "comments": "Generate the UDR resource for each of the subnets configured to do so. To suppress creation, set subnet.additionalUdrParameters.suppress=true",
+            "comments": "Generate the UDR resource for each of the subnets.",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
