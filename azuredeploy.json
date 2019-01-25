@@ -29,26 +29,37 @@
     },
     "variables": {
         "vnet-address-space": "[concat(parameters('vnet-prefix'),'.0.0/16')]",
+        "comment-how-to-add-new-subnet": "-- Add new item to array below, and add NSG / UDR files to /nestedtemplates/subnet-{name}-{type}.json --",
+        "subnet-address-prefixes": {
+            "mysubnet1Prefix": "[concat(parameters('vnet-prefix'), '.1.0/24')]",
+            "mysubnet2Prefix": "[concat(parameters('vnet-prefix'), '.2.0/24')]",
+            "mysubnet3Prefix": "[concat(parameters('vnet-prefix'), '.3.0/24')]",
+            "GatewaySubnetPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]"
+        },
         "subnets": [
             {
                 "name": "mysubnet1",
-                "addressPrefix": "[concat(parameters('vnet-prefix'), '.1.0/24')]",
-                "additionalParameters": {}
+                "addressPrefix": "[variables('subnet-address-prefixes').mysubnet1Prefix]",
+                "additionalNsgParameters": {},
+                "additionalUdrParameters": {}
             },
             {
                 "name": "mysubnet2",
-                "addressPrefix": "[concat(parameters('vnet-prefix'), '.2.0/24')]",
-                "additionalParameters": {}
+                "addressPrefix": "[variables('subnet-address-prefixes').mysubnet2Prefix]",
+                "additionalNsgParameters": {},
+                "additionalUdrParameters": {}
             },
             {
                 "name": "mysubnet3",
-                "addressPrefix": "[concat(parameters('vnet-prefix'), '.3.0/24')]",
-                "additionalParameters": {}
+                "addressPrefix": "[variables('subnet-address-prefixes').mysubnet3Prefix]",
+                "additionalNsgParameters": {},
+                "additionalUdrParameters": {}
             },
             {
+                "comment": "-- GatewaySubnet Must be last in the array --",
                 "name": "[variables('const_GatewaySubnetName')]",
-                "addressPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]",
-                "additionalParameters": {}
+                "addressPrefix": "[variables('subnet-address-prefixes').GatewaySubnetPrefix]",
+                "additionalUdrParameters": {}
             }
         ],
         "const_GatewaySubnetName": "GatewaySubnet"
@@ -108,7 +119,7 @@
                         "value": "[concat(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,'-nsg')]"
                     },
                     "additional-parameters": {
-                        "value": "[variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].additionalParameters]"
+                        "value": "[union(variables('subnet-address-prefixes'),variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].additionalNsgParameters)]"
                     }
                 }
             }
@@ -134,7 +145,7 @@
                         "value": "[concat(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name,'-udr')]"
                     },
                     "additional-parameters": {
-                        "value": "[variables('subnets')[copyIndex('subnet-udr-dependency-loop')].additionalParameters]"
+                        "value": "[union(variables('subnet-address-prefixes'),variables('subnets')[copyIndex('subnet-udr-dependency-loop')].additionalUdrParameters)]"
                     }
                 }
             }

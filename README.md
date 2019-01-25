@@ -1,7 +1,9 @@
 
-# Maintainable ARM based Virtual Network Network
+# Extensible ARM based Virtual Network Network
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fross-mcdermott%2Fhybrid-azure-network-with-arm%2Fworking%2Fazuredeploy.json" target="_blank">
+
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fross-mcdermott%2Fhybrid-azure-network-with-arm%master%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/> 
 </a>
 
