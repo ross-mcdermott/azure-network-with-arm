@@ -64,7 +64,9 @@
                 "additionalNsgParameters": {
                     "suppress": true
                 },
-                "additionalUdrParameters": {}
+                "additionalUdrParameters": {
+                    "suppress": false
+                }
             }
         ]
     },
