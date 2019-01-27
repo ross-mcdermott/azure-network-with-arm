@@ -7,27 +7,26 @@
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located including a trailing '/'"
             },
-            "defaultValue": "https://raw.githubusercontent.com/ross-mcdermott/azure-network-with-arm/master/azuredeploy.json"
+            "defaultValue": "https://raw.githubusercontent.com/ross-mcdermott/azure-network-with-arm/master/simple-network/"
         },
         "_artifactsLocationSasToken": {
             "type": "securestring",
             "metadata": {
                 "description": "The sasToken required to access _artifactsLocation. Use the defaultValue if the artifact location is not secured."
-            }
+            },
+            "defaultValue": ""
         },
         "vnet-name": {
             "type": "string",
             "metadata": {
                 "description": "Resource name for the VNET"
-            },
-            "defaultValue": "sample-vnet"
+            }
         },
         "vnet-prefix": {
             "type": "string",
             "metadata": {
                 "description": "IP prefix (first 2 octets for this sample, e.g. 10.1)."
-            },
-            "defaultValue": "10.1"
+            }
         }
     },
     "variables": {
@@ -65,7 +64,8 @@
             "vnetName": "[parameters('vnet-name')]",
             "vnetAddressSpace": "[variables('vnet-address-space')]",
             "subnetAddressPrefixes": "[variables('subnet-address-prefixes')]"
-        }
+        },
+        "const_GatewaySubnet": "GatewaySubnet"
     },
     "resources": [
         {
@@ -90,8 +90,10 @@
                             "name": "[variables('subnets')[copyIndex('subnets')].name]",
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
-                                "networkSecurityGroup": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-dependencies')).outputs.networkSecurityGroup.value]",
-                                "routeTable": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-dependencies')).outputs.routeTable.value]"
+                                "networkSecurityGroup": "[if(not(equals(variables('subnets')[copyIndex('subnets')].name,variables('const_GatewaySubnet'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(parameters('vnet-name'),'-',variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
+                                "routeTable": {
+                                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', concat(parameters('vnet-name'),'-',variables('subnets')[copyIndex('subnets')].name,'-udr'))]"
+                                }
                             }
                         }
                     }

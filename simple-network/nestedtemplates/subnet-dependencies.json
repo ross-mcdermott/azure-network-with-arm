@@ -87,13 +87,13 @@
         }
     ],
     "outputs": {
-        "networkSecurityGroup": {
-            "value": "[if(not(equals(parameters('subnet').name,variables('const_GatewaySubnet'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', variables('nsgName')), '\"}')),json('{}'))]",
-            "type": "object"
+        "nsgResourceId": {
+            "value": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]",
+            "type": "string"
         },
-        "routeTable": {
-            "value": "[json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', variables('udrName')), '\"}'))]",
-            "type": "object"
+        "udrResourceId": {
+            "value": "[resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', variables('udrName'))]",
+            "type": "string"
         }
     }
 }
