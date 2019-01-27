@@ -75,8 +75,7 @@
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
             "dependsOn": [
-                "subnet-udr-dependency-loop",
-                "subnet-nsg-dependency-loop"
+                "subnet-dependency-loop"
             ],
             "properties": {
                 "addressSpace": {
@@ -109,7 +108,7 @@
                 "name": "subnet-dependency-loop",
                 "count": "[length(variables('subnets'))]"
             },
-            "comments": "Generate the UDR and NSG resource for each of the subnets (Except GatewaySubnet where NSG is not supported).",
+            "comments": "Generate the UDR and NSG resource for each of the subnets (GatewaySubnet will not have NSG created as is not supported).",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
