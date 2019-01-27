@@ -1,0 +1,134 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/ross-mcdermott/azure-network-with-arm/master/azuredeploy.json"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation. Use the defaultValue if the artifact location is not secured."
+            }
+        },
+        "vnet-name": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource name for the VNET"
+            },
+            "defaultValue": "sample-vnet"
+        },
+        "vnet-prefix": {
+            "type": "string",
+            "metadata": {
+                "description": "IP prefix (first 2 octets for this sample, e.g. 10.1)."
+            },
+            "defaultValue": "10.1"
+        }
+    },
+    "variables": {
+        "vnet-address-space": "[concat(parameters('vnet-prefix'),'.0.0/16')]",
+        "subnet-address-prefixes": {
+            "mysubnet1Prefix": "[concat(parameters('vnet-prefix'), '.1.0/24')]",
+            "mysubnet2Prefix": "[concat(parameters('vnet-prefix'), '.2.0/24')]",
+            "mysubnet3Prefix": "[concat(parameters('vnet-prefix'), '.3.0/24')]",
+            "GatewaySubnetPrefix": "[concat(parameters('vnet-prefix'), '.255.224/27')]"
+        },
+        "subnets": [
+            {
+                "name": "mysubnet1",
+                "addressPrefix": "[variables('subnet-address-prefixes').mysubnet1Prefix]",
+                "additionalParameters": {}
+            },
+            {
+                "name": "mysubnet2",
+                "addressPrefix": "[variables('subnet-address-prefixes').mysubnet2Prefix]",
+                "additionalParameters": {}
+            },
+            {
+                "name": "mysubnet3",
+                "addressPrefix": "[variables('subnet-address-prefixes').mysubnet3Prefix]",
+                "additionalParameters": {}
+            },
+            {
+                "name": "GatewaySubnet",
+                "addressPrefix": "[variables('subnet-address-prefixes').GatewaySubnetPrefix]",
+                "additionalParameters": {}
+            }
+        ],
+        "context-comment": "Enables the addion of more properties to be passed through to dependencies without changing paramters on each file.",
+        "context": {
+            "vnetName": "[parameters('vnet-name')]",
+            "vnetAddressSpace": "[variables('vnet-address-space')]",
+            "subnetAddressPrefixes": "[variables('subnet-address-prefixes')]"
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('vnet-name')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "subnet-dependency-loop"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnet-address-space')]"
+                    ]
+                },
+                "copy": [
+                    {
+                        "name": "subnets",
+                        "count": "[length(variables('subnets'))]",
+                        "input": {
+                            "name": "[variables('subnets')[copyIndex('subnets')].name]",
+                            "properties": {
+                                "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
+                                "networkSecurityGroup": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-dependencies')).outputs.networkSecurityGroup.value]",
+                                "routeTable": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-dependencies')).outputs.routeTable.value]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-dependency-loop')].name),'-dependencies')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2016-09-01",
+            "dependsOn": [],
+            "copy": {
+                "name": "subnet-dependency-loop",
+                "count": "[length(variables('subnets'))]"
+            },
+            "comments": "Generate the UDR and NSG resource for each of the subnets (GatewaySubnet will not have NSG created as is not supported).",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/subnet-dependencies.json',parameters('_artifactsLocationSasToken')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "subnet": {
+                        "value": "[variables('subnets')[copyIndex('subnet-dependency-loop')]]"
+                    },
+                    "context": {
+                        "value": "[variables('context')]"
+                    }
+                }
+            }
+        }
+    ]
+}
