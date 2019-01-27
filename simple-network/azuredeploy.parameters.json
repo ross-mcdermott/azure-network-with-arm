@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "vnet-name": {
-            "value": "sample-vnet"
+            "value": "sample"
         },
         "vnet-prefix": {
             "value": "10.1"

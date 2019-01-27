@@ -19,7 +19,7 @@
         "vnet-name": {
             "type": "string",
             "metadata": {
-                "description": "Resource name for the VNET"
+                "description": "Name for the VNET. Appropriate naming convention will be applied automatically when creating resource (i.e. XXX-vnet where XXX is the vnet-name parameter)"
             }
         },
         "vnet-prefix": {
@@ -30,6 +30,7 @@
         }
     },
     "variables": {
+        "vnet-resource-name": "[concat(parameters('vnet-name'),'-vnet')]",
         "vnet-address-space": "[concat(parameters('vnet-prefix'),'.0.0/16')]",
         "subnet-address-prefixes": {
             "mysubnet1Prefix": "[concat(parameters('vnet-prefix'), '.1.0/24')]",
@@ -61,7 +62,7 @@
         ],
         "context-comment": "Enables the addion of more properties to be passed through to dependencies without changing paramters on each file.",
         "context": {
-            "vnetName": "[parameters('vnet-name')]",
+            "vnetName": "[variables('vnet-resource-name')]",
             "vnetAddressSpace": "[variables('vnet-address-space')]",
             "subnetAddressPrefixes": "[variables('subnet-address-prefixes')]"
         },
@@ -69,7 +70,7 @@
     },
     "resources": [
         {
-            "name": "[parameters('vnet-name')]",
+            "name": "[variables('vnet-resource-name')]",
             "type": "Microsoft.Network/virtualNetworks",
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
@@ -90,9 +91,9 @@
                             "name": "[variables('subnets')[copyIndex('subnets')].name]",
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
-                                "networkSecurityGroup": "[if(not(equals(variables('subnets')[copyIndex('subnets')].name,variables('const_GatewaySubnet'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(parameters('vnet-name'),'-',variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
+                                "networkSecurityGroup": "[if(not(equals(variables('subnets')[copyIndex('subnets')].name,variables('const_GatewaySubnet'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('vnet-resource-name'),'-',variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
                                 "routeTable": {
-                                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', concat(parameters('vnet-name'),'-',variables('subnets')[copyIndex('subnets')].name,'-udr'))]"
+                                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', concat(variables('vnet-resource-name'),'-',variables('subnets')[copyIndex('subnets')].name,'-udr'))]"
                                 }
                             }
                         }
