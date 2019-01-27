@@ -1,0 +1,99 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation. Use the defaultValue if the artifact location is not secured."
+            },
+            "defaultValue": ""
+        },
+        "subnet": {
+            "type": "object",
+            "metadata": {
+                "description": "The subnet configuration from parent template to be created"
+            }
+        },
+        "context": {
+            "type": "object",
+            "metadata": {
+                "description": "Common context information to enable generic processing."
+            }
+        }
+    },
+    "variables": {
+        "const_GatewaySubnet": "GatewaySubnet",
+        "udrName": "[concat(parameters('context').vnetName, '-', parameters('subnet').name,'-udr')]",
+        "nsgName": "[concat(parameters('context').vnetName, '-', parameters('subnet').name,'-nsg')]"
+    },
+    "resources": [
+        {
+            "condition": "[not(equals(parameters('subnet').name,variables('const_GatewaySubnet')))]",
+            "name": "[concat(toLower(parameters('subnet').name),'-nsg-deployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2016-09-01",
+            "dependsOn": [],
+            "comments": "Generate the NSG resource for the subnet (Except GatewaySubnet where it is not supported).",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/subnet-',toLower(parameters('subnet').name),'-nsg.json',parameters('_artifactsLocationSasToken')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "subnet": {
+                        "value": "[parameters('subnet')]"
+                    },
+                    "resource-name": {
+                        "value": "[variables('nsgName')]"
+                    },
+                    "context": {
+                        "value": "[parameters('context')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[concat(toLower(parameters('subnet').name),'-udr-deployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2016-09-01",
+            "dependsOn": [],
+            "comments": "Generate the UDR resource for the subnet.",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/subnet-',toLower(parameters('subnet').name),'-udr.json',parameters('_artifactsLocationSasToken')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "subnet": {
+                        "value": "[parameters('subnet')]"
+                    },
+                    "resource-name": {
+                        "value": "[variables('udrName')]"
+                    },
+                    "context": {
+                        "value": "[parameters('context')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "nsgResourceId": {
+            "value": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]",
+            "type": "string"
+        },
+        "udrResourceId": {
+            "value": "[resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', variables('udrName'))]",
+            "type": "string"
+        }
+    }
+}
