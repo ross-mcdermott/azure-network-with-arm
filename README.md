@@ -3,13 +3,16 @@
 
 
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fross-mcdermott%2Fazure-network-with-arm%master%2Fsimple-network%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fross-mcdermott%2Fazure-network-with-arm%2Fmaster%2Fsimple-network%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/> 
 </a>
 
 <a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fross-mcdermott%2Fazure-network-with-arm%master%2Fsimple-network%2Fazuredeploy.json" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/> 
 </a>
+
+## Overview
+The repo contains an example of using nested templates and a convention based approach to create a simple to manage and extend Virtal Network. It is designed to be expanded upon with additonal standard networking resources as a demo.
 
 ## Executing the template
 
