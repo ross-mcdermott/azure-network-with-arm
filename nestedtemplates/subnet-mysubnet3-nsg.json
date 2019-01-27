@@ -2,16 +2,22 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "subnet": {
+            "type": "object",
+            "metadata": {
+                "description": "The subnet configuration from parent template to be created"
+            }
+        },
+        "context": {
+            "type": "object",
+            "metadata": {
+                "description": "Common context information to enable generic processing."
+            }
+        },
         "resource-name": {
             "type": "string",
             "metadata": {
-                "description": "Name to apply to this resource"
-            }
-        },
-        "additional-parameters": {
-            "type": "object",
-            "metadata": {
-                "description": "Additional parameters as passed through"
+                "description": "Name to apply to this resource (required because of issue detailed in azure-docs:17978)"
             }
         }
     },

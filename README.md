@@ -7,7 +7,7 @@
     <img src="http://azuredeploy.net/deploybutton.png"/> 
 </a>
 
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fross-mcdermott%2Fhybrid-azure-network-with-arm%2Fworking%2Fazuredeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fross-mcdermott%2Fhybrid-azure-network-with-arm%master%2Fazuredeploy.json" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/> 
 </a>
 

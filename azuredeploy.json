@@ -43,29 +43,30 @@
             {
                 "name": "mysubnet1",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet1Prefix]",
-                "additionalNsgParameters": {},
-                "additionalUdrParameters": {}
+                "additionalParameters": {}
             },
             {
                 "name": "mysubnet2",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet2Prefix]",
-                "additionalNsgParameters": {},
-                "additionalUdrParameters": {}
+                "additionalParameters": {}
             },
             {
                 "name": "mysubnet3",
                 "addressPrefix": "[variables('subnet-address-prefixes').mysubnet3Prefix]",
-                "additionalNsgParameters": {},
-                "additionalUdrParameters": {}
+                "additionalParameters": {}
             },
             {
-                "name": "[variables('const_GatewaySubnet')]",
+                "name": "GatewaySubnet",
                 "addressPrefix": "[variables('subnet-address-prefixes').GatewaySubnetPrefix]",
-                "additionalNsgParameters": {},
-                "additionalUdrParameters": {}
+                "additionalParameters": {}
             }
         ],
-        "const_GatewaySubnet": "GatewaySubnet"
+        "context-comment": "Enables the addion of more properties to be passed through to dependencies without changing paramters on each file.",
+        "context": {
+            "vnetName": "[parameters('vnet-name')]",
+            "vnetAddressSpace": "[variables('vnet-address-space')]",
+            "subnetAddressPrefixes": "[variables('subnet-address-prefixes')]"
+        }
     },
     "resources": [
         {
@@ -91,10 +92,8 @@
                             "name": "[variables('subnets')[copyIndex('subnets')].name]",
                             "properties": {
                                 "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
-                                "networkSecurityGroup": "[if(not(equals(variables('subnets')[copyIndex('subnets')].name,variables('const_GatewaySubnet'))), json(concat('{\"id\": \"', resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups/', concat(variables('subnets')[copyIndex('subnets')].name,'-nsg')), '\"}')),json('null'))]",
-                                "routeTable": {
-                                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/routeTables/', concat(variables('subnets')[copyIndex('subnets')].name,'-udr'))]"
-                                }
+                                "networkSecurityGroup": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-dependencies')).outputs.networkSecurityGroup.value]",
+                                "routeTable": "[reference(concat(toLower(variables('subnets')[copyIndex('subnets')].name),'-dependencies')).outputs.routeTable.value]"
                             }
                         }
                     }
@@ -102,16 +101,15 @@
             }
         },
         {
-            "condition": "[not(equals(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,variables('const_GatewaySubnet')))]",
-            "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name),'-nsg-dependencies')]",
+            "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-dependency-loop')].name),'-dependencies')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2016-09-01",
             "dependsOn": [],
             "copy": {
-                "name": "subnet-nsg-dependency-loop",
+                "name": "subnet-dependency-loop",
                 "count": "[length(variables('subnets'))]"
             },
-            "comments": "Generate the UDR resource for each of the subnets (Except GatewaySubnet where it is not supported).",
+            "comments": "Generate the UDR and NSG resource for each of the subnets (Except GatewaySubnet where NSG is not supported).",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -119,37 +117,17 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "resource-name": {
-                        "value": "[concat(variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].name,'-nsg')]"
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
                     },
-                    "additional-parameters": {
-                        "value": "[union(variables('subnet-address-prefixes'),variables('subnets')[copyIndex('subnet-nsg-dependency-loop')].additionalNsgParameters)]"
-                    }
-                }
-            }
-        },
-        {
-            "name": "[concat(toLower(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name),'-udr-dependencies')]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2016-09-01",
-            "dependsOn": [],
-            "copy": {
-                "name": "subnet-udr-dependency-loop",
-                "count": "[length(variables('subnets'))]"
-            },
-            "comments": "Generate the UDR resource for each of the subnets.",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/subnet-',toLower(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name),'-udr.json',parameters('_artifactsLocationSasToken')))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "resource-name": {
-                        "value": "[concat(variables('subnets')[copyIndex('subnet-udr-dependency-loop')].name,'-udr')]"
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
                     },
-                    "additional-parameters": {
-                        "value": "[union(variables('subnet-address-prefixes'),variables('subnets')[copyIndex('subnet-udr-dependency-loop')].additionalUdrParameters)]"
+                    "subnet": {
+                        "value": "[variables('subnets')[copyIndex('subnet-dependency-loop')]]"
+                    },
+                    "context": {
+                        "value": "[variables('context')]"
                     }
                 }
             }
