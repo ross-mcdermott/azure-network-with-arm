@@ -22,6 +22,8 @@ The template can be executed via the above buttons, alternatively use the deploy
 .\Deploy-AzureResourceGroup.ps1 -ArtifactStagingDirectory .\sample-network -ResourceGroupLocation "Australia East" -UploadArtifacts
 ```
 
+More explanation at https://rossm.tech/2019/01/an-arm-based-virtual-network-designed-for-change/
+
 **Note:**
 A limitation (see issue [17978](https://github.com/MicrosoftDocs/azure-docs/issues/17878)) with the use of references within an ARM template in combination with IF statements exists at the time of writing, which influenced the method in which the conditional logic for skipping NSG allocation to the GatewaySubnet was achived, and duplication of the NSG / UDR resource name / ID creation is required which isn't ideal. Once the issue if resolved, this can be fixed to use the output values 'nsgResourceId' and 'udrResourceId' from the nested deployment in combination with the IF statement.
 
